@@ -1,7 +1,8 @@
-{
+var data = {
+    song: "The Fresh Prince of Bel-Air",
     lines: [
         {
-            time: 0,
+            time: 0.1,
             text: "Now this is a story all about how my life got flip turned upside down"
         },
         {
@@ -10,7 +11,11 @@
         },
         {
             time: 8.7,
-            text: "I'll tell you how I became the prince of a town called Bel Air"
+            text: "I'll tell you how I became the prince of a town called Bel-Air"
+        },
+        {
+            time: 10,
+            text: ""
         }
     ]
 }

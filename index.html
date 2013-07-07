@@ -1,7 +1,14 @@
 <html>
     <head>
+        <script type="text/javascript" src="resources/belair.json"></script>
         <style type="text/css">
-
+            #makeitstop{
+                display:none;
+            }
+            #loudspeaker{
+                font-family: cursive;
+                font-size:5em;
+            }
         </style>
     </head>
     <body>
@@ -10,31 +17,66 @@
             <p>Your browser sucks and you should feel bad.</p>
         </audio>
 
+        <div id="loudspeaker">
+
+        </div>
 
         <div id="makeitstop">
             MAKE IT STOP
         </div>
 
         <script type="text/javascript">
-            audio = document.getElementsByTagName("audio")[0];
 
-            //functions
-            audio.load();
-            audio.play();
-            //audio.pause();
-
-            window.setInterval(
-                function(){
-                    console.log(audio.currentTime);
-                },
-                200
-            );
             //properties
             /*
+            audio.load
             audio.currentSrc  
             audio.currentTime  
             audio.duration
             */
+
+            var Director = function(data){
+                this.data = data;
+                this.registerElements();
+
+                this.controls = new Controls(this.audioElement);
+                this.currentLine = false; 
+            }
+
+            Director.prototype.registerElements = function(){
+                this.audioElement = document.getElementsByTagName("audio")[0];
+                this.loudspeaker = document.getElementById("loudspeaker");
+            }
+
+            Director.prototype.action = function(){
+                var self = this;
+
+                self.lines = data.lines;
+                self.nextLine = self.lines.shift();
+
+                this.audioElement.play();
+
+                self.intervalId = window.setInterval(
+                    function(){
+                        if(self.nextLine === undefined){
+                            return;    
+                        }
+
+                        var playTime = self.audioElement.currentTime.toFixed(1);
+
+                        if(self.currentLine){ 
+                            self.loudspeaker.innerHTML = self.currentLine.text;
+                            //console.log(self.loudspeaker,self.currentLine.text);
+                        }
+
+                        if(self.nextLine.time < playTime){
+                            self.currentLine = self.nextLine;
+                            self.nextLine = self.lines.shift();
+                        }
+                    },
+                    250
+                );
+            }
 
             var Controls = function(audioElement){
                 this.audioElement = audioElement;
@@ -54,7 +96,8 @@
                 });
             }
 
-            var controls = new Controls(audio);
+            var director = new Director(data);
+            director.action();
             
         </script>
     </body>
