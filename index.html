@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <style type="text/css">
+
+        </style>
+    </head>
+    <body>
+
+        <audio id="track" src="audio/belair.mp3">
+            <p>Your browser sucks and you should feel bad.</p>
+        </audio>
+
+
+        <div id="makeitstop">
+            MAKE IT STOP
+        </div>
+
+        <script type="text/javascript">
+            audio = document.getElementsByTagName("audio")[0];
+
+            //functions
+            audio.load();
+            audio.play();
+            //audio.pause();
+
+            window.setInterval(
+                function(){
+                    console.log(audio.currentTime);
+                },
+                200
+            );
+            //properties
+            /*
+            audio.currentSrc  
+            audio.currentTime  
+            audio.duration
+            */
+
+            var Controls = function(audioElement){
+                this.audioElement = audioElement;
+
+                this.registerControls();
+                this.init();
+            }
+
+            Controls.prototype.registerControls = function(){
+                this.stopButton = document.getElementById("makeitstop");        
+            }
+
+            Controls.prototype.init = function(){
+                var self = this;
+                this.stopButton.addEventListener('click',function(){
+                    self.audioElement.pause();
+                });
+            }
+
+            var controls = new Controls(audio);
+            
+        </script>
+    </body>
+</html>
+

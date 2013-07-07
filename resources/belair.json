@@ -1,0 +1,17 @@
+{
+    lines: [
+        {
+            time: 0,
+            text: "Now this is a story all about how my life got flip turned upside down"
+        },
+        {
+            time: 6.6,
+            text: "And i'd like to take a minute, just sit right there"
+        },
+        {
+            time: 8.7,
+            text: "I'll tell you how I became the prince of a town called Bel Air"
+        }
+    ]
+}
+
