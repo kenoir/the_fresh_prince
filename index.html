@@ -2,12 +2,13 @@
     <head>
         <script type="text/javascript" src="resources/belair.json"></script>
         <style type="text/css">
-            #makeitstop{
+            #controls{
                 display:none;
             }
             #loudspeaker{
                 font-family: cursive;
-                font-size:5em;
+                font-size:4em;
+                padding:10%;
             }
         </style>
     </head>
@@ -21,8 +22,9 @@
 
         </div>
 
-        <div id="makeitstop">
-            MAKE IT STOP
+        <div id="controls">
+            <div id="stop">stop</div>
+            <div id="play">play</div>
         </div>
 
         <script type="text/javascript">
@@ -58,15 +60,16 @@
 
                 self.intervalId = window.setInterval(
                     function(){
+                        var playTime = self.audioElement.currentTime.toFixed(1);
+                        console.log(playTime);
+
                         if(self.nextLine === undefined){
                             return;    
                         }
 
-                        var playTime = self.audioElement.currentTime.toFixed(1);
 
                         if(self.currentLine){ 
                             self.loudspeaker.innerHTML = self.currentLine.text;
-                            //console.log(self.loudspeaker,self.currentLine.text);
                         }
 
                         if(self.nextLine.time < playTime){
@@ -86,14 +89,21 @@
             }
 
             Controls.prototype.registerControls = function(){
-                this.stopButton = document.getElementById("makeitstop");        
+                this.stopButton = document.getElementById("stop");        
+                this.playButton = document.getElementById("play");
             }
 
             Controls.prototype.init = function(){
                 var self = this;
+
+                this.playButton.addEventListener('click',function(){
+                    self.audioElement.play();
+                });
+
                 this.stopButton.addEventListener('click',function(){
                     self.audioElement.pause();
                 });
+
             }
 
             var director = new Director(data);

@@ -16,7 +16,80 @@ var data = {
         {
             time: 10,
             text: ""
+        },
+        {
+            time: 21.2,
+            text: "In west Philadelphia, born and raised"
+        },
+        {
+            time: 23.2,
+            text: "on the playground is where I spent most of my days"
+        },
+        {
+            time: 25.6,
+            text: "chilling out, maxing, relaxing and cooling"
+        },
+        {
+            time: 28.5,
+            text: "or shooting some b-ball, outside of school"
+        },
+        {
+            time: 30.6,
+            text: "when a couple of guys who were up to no good"
+        },
+        { 
+            time: 32.6,
+            text: "started making trouble in my neighbourhood"
+        },
+        {
+            time: 35.0,
+            text: "i got in one little fight, and my mom got scared"
+        },
+        {
+            time: 37,
+            text: "you're going to live with your auntie and uncle in BEL AIR"
+        },
+        {
+            time: 40,
+            text: "I whistled for a cab and when it came near"
+        },
+        {
+            time: 42.1,
+            text: "the license plate said fresh and it had dice in the mirror"
+        },
+        {
+            time: 44.8,
+            text: "if anything i could say that this cab was rare"
+        },
+        {
+            time: 47,
+            text: "but i thought man forget it, yo home to BEL AIR"
+        },
+        {
+            time: 49,
+            text: ""
+        },
+        {
+            time: 51,
+            text: "I pulled up to the house about 7 or 8"
+        },
+        {
+            time: 54,
+            text: "and i yelled to the cabbie, yo holmes smell you later"
+        },
+        {
+            time: 56,
+            text: "i looked at my kingdom, i was finally there"
+        },
+        {
+            time: 58.9,
+            text: "to sit on my throne as the PRINCE OF BEL AIR"
+        },
+        {
+            time: 65,
+            text: ""
         }
     ]
 }
+
 
