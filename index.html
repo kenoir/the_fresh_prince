@@ -56,6 +56,7 @@
                 self.lines = data.lines;
                 self.nextLine = self.lines.shift();
 
+                this.audioElement.muted = false;
                 this.audioElement.play();
 
                 self.intervalId = window.setInterval(
@@ -97,7 +98,6 @@
                 var self = this;
 
                 this.playButton.addEventListener('click',function(){
-                    self.audioElement.muted = false;
                     self.audioElement.play();
                 });
 
