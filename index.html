@@ -6,10 +6,50 @@
                 display:block;
             }
             #loudspeaker{
-                font-family: cursive;
+                font-family: Arial, Helvetica, sans-serif;
                 font-size:4em;
                 padding:10%;
             }
+
+            button#play, button#stop {
+                border: 1px solid #ccc;
+                background-color: #f0f0f0;
+                padding: 10px 15px;
+                margin: 5px;
+                cursor: pointer;
+                font-size: 1em;
+            }
+
+            button#play:hover, button#stop:hover {
+                background-color: #e0e0e0;
+            }
+
+            button#play:active, button#stop:active,
+            button#play:focus, button#stop:focus {
+                background-color: #d0d0d0;
+                outline: 2px solid #005fcc;
+            }
+
+        @media (max-width: 600px) {
+            #loudspeaker {
+                font-size: 2.5em;
+                padding: 5%;
+            }
+
+            button#play, button#stop {
+                width: 80%;
+                margin-left: 10%;
+                margin-right: 10%;
+                margin-bottom: 10px;
+                /* font-size: 0.9em; /* Optionally adjust button font size */
+            }
+
+            #controls { /* Ensure controls div allows for vertical stacking if needed */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
         </style>
     </head>
     <body>
@@ -23,8 +63,8 @@
         </div>
 
         <div id="controls">
-            <div id="stop">stop</div>
-            <div id="play">Start</div>
+    <button id="stop" type="button">stop</button>
+    <button id="play" type="button">Start</button>
         </div>
 
         <script type="text/javascript">
@@ -45,6 +85,61 @@
                 this.currentLine = false; 
             }
 
+            Director.prototype.reset = function(){
+                this.audioElement.currentTime = 0;
+                if (this.intervalId) {
+                    window.clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+                this.currentLine = false;
+                this.loudspeaker.innerHTML = "";
+                // Assuming 'data' is the global variable loaded from belair.json
+                this.lines = JSON.parse(JSON.stringify(window.data.lines));
+                this.nextLine = this.lines.shift();
+                this.audioElement.muted = true; // Initial state was muted
+            };
+
+            Director.prototype.togglePlayPause = function(){
+                var self = this;
+                if (this.audioElement.paused) {
+                    if (this.currentLine === false) { // Fresh start or after reset
+                        this.action(); // This will call play and start interval
+                    } else { // Resuming
+                        this.audioElement.play();
+                        // Restart interval if it was cleared
+                        if (!this.intervalId) {
+                            this.intervalId = window.setInterval(function(){
+                                var playTime = self.audioElement.currentTime.toFixed(1);
+                                console.log(playTime);
+                                if(self.nextLine === undefined && !self.currentLine){ // End of lines and nothing current
+                                    window.clearInterval(self.intervalId);
+                                    self.intervalId = null;
+                                    return;
+                                }
+                                if(self.currentLine){
+                                    self.loudspeaker.innerHTML = self.currentLine.text;
+                                }
+                                if(self.nextLine && self.nextLine.time < playTime){
+                                    self.currentLine = self.nextLine;
+                                    self.nextLine = self.lines.shift();
+                                } else if (!self.nextLine && self.audioElement.currentTime >= self.audioElement.duration) {
+                                    // Handles case where it reaches end and nextLine is already undefined
+                                     self.currentLine = null; // Clear last line
+                                }
+                            }, 250);
+                        }
+                    }
+                    return "playing";
+                } else { // It's playing
+                    this.audioElement.pause();
+                    if (this.intervalId) {
+                        window.clearInterval(this.intervalId);
+                        this.intervalId = null;
+                    }
+                    return "paused";
+                }
+            };
+
             Director.prototype.registerElements = function(){
                 this.audioElement = document.getElementsByTagName("audio")[0];
                 this.loudspeaker = document.getElementById("loudspeaker");
@@ -53,33 +148,54 @@
             Director.prototype.action = function(){
                 var self = this;
 
-                self.lines = data.lines;
-                self.nextLine = self.lines.shift();
+                // Only initialize if it's a fresh start (e.g., currentLine is false)
+                if (this.currentLine === false) {
+                    this.audioElement.muted = false; // Ensure audio is unmuted before playing
 
-                this.audioElement.muted = false;
-                this.audioElement.play();
+                    // Assuming 'data' is the global variable from belair.json
+                    // If this.lines is already populated by reset, this might be redundant or handled by reset.
+                    // For now, let reset handle initial population. Action ensures it's ready.
+                    if (!this.lines || this.lines.length === 0) { // If lines are not set up (e.g. very first run)
+                        this.lines = JSON.parse(JSON.stringify(window.data.lines));
+                        this.nextLine = this.lines.shift();
+                    }
 
-                self.intervalId = window.setInterval(
-                    function(){
-                        var playTime = self.audioElement.currentTime.toFixed(1);
-                        console.log(playTime);
+                    this.audioElement.play();
 
-                        if(self.nextLine === undefined){
-                            return;    
-                        }
+                    if (this.intervalId) { // Clear any existing interval before starting a new one
+                        window.clearInterval(this.intervalId);
+                    }
+                    this.intervalId = window.setInterval(
+                        function(){
+                            var playTime = self.audioElement.currentTime.toFixed(1);
+                            console.log(playTime);
 
+                            if(self.nextLine === undefined && !self.currentLine){ // End of lines and nothing current
+                                window.clearInterval(self.intervalId);
+                                self.intervalId = null;
+                                return;
+                            }
 
-                        if(self.currentLine){ 
-                            self.loudspeaker.innerHTML = self.currentLine.text;
-                        }
+                            if(self.currentLine){
+                                self.loudspeaker.innerHTML = self.currentLine.text;
+                            }
 
-                        if(self.nextLine.time < playTime){
-                            self.currentLine = self.nextLine;
-                            self.nextLine = self.lines.shift();
-                        }
-                    },
-                    250
-                );
+                            if(self.nextLine && self.nextLine.time < playTime){
+                                self.currentLine = self.nextLine;
+                                self.nextLine = self.lines.shift();
+                            } else if (!self.nextLine && self.audioElement.currentTime >= self.audioElement.duration) {
+                               // Handles case where it reaches end and nextLine is already undefined
+                                self.currentLine = null; // Clear last line
+                            }
+                        },
+                        250
+                    );
+                } else {
+                    // If action is called when already initialized (e.g. from togglePlayPause resume),
+                    // it could just ensure play is called, but togglePlayPause handles that.
+                    // This path should ideally not be hit if togglePlayPause is the main interface.
+                    this.audioElement.play();
+                }
             }
 
             var Controls = function(audioElement, director){
@@ -99,13 +215,25 @@
                 var self = this;
 
                 this.playButton.addEventListener('click',function(){
-                    self.director.action();
+                    const state = self.director.togglePlayPause();
+                    if (state === "playing") {
+                        self.playButton.textContent = 'Pause';
+                    } else {
+                        self.playButton.textContent = 'Start';
+                    }
                 });
 
                 this.stopButton.addEventListener('click',function(){
-                    self.audioElement.pause();
+                    // self.audioElement.pause(); // director.reset() will handle pausing via currentTime = 0 and muted = true
+                    self.director.reset();
+                    self.playButton.textContent = 'Start';
                 });
 
+                // Add event listener for when the audio ends
+                this.audioElement.addEventListener('ended', function() {
+                    self.playButton.textContent = 'Start';
+                    self.director.reset(); // Reset director's state
+                });
             }
 
             var director = new Director(data);
