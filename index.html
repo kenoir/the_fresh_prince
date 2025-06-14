@@ -3,7 +3,7 @@
         <script type="text/javascript" src="resources/belair.json"></script>
         <style type="text/css">
             #controls{
-                display:none;
+                display:block;
             }
             #loudspeaker{
                 font-family: cursive;
@@ -24,7 +24,7 @@
 
         <div id="controls">
             <div id="stop">stop</div>
-            <div id="play">play</div>
+            <div id="play">Start</div>
         </div>
 
         <script type="text/javascript">
@@ -41,7 +41,7 @@
                 this.data = data;
                 this.registerElements();
 
-                this.controls = new Controls(this.audioElement);
+                this.controls = new Controls(this.audioElement, this);
                 this.currentLine = false; 
             }
 
@@ -82,8 +82,9 @@
                 );
             }
 
-            var Controls = function(audioElement){
+            var Controls = function(audioElement, director){
                 this.audioElement = audioElement;
+                this.director = director;
 
                 this.registerControls();
                 this.init();
@@ -98,7 +99,7 @@
                 var self = this;
 
                 this.playButton.addEventListener('click',function(){
-                    self.audioElement.play();
+                    self.director.action();
                 });
 
                 this.stopButton.addEventListener('click',function(){
@@ -108,7 +109,6 @@
             }
 
             var director = new Director(data);
-            director.action();
             
         </script>
     </body>
