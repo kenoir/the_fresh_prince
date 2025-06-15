@@ -1,0 +1,51 @@
+name: Run Tests
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Puppeteer
+        run: npm install puppeteer # Installs puppeteer in the root directory
+
+      - name: Start dev server
+        run: |
+          cd react-audio-player
+          npm start &
+          echo $! > ../server.pid # Store the process ID in the root directory
+        working-directory: . # Ensure this runs from the root if paths are relative like ../server.pid
+
+      - name: Wait for server to be ready
+        run: |
+          timeout 60 bash -c 'until curl -s http://localhost:3000 > /dev/null; do echo "Waiting for server..."; sleep 1; done'
+
+      - name: Run tests and check for failures
+        run: |
+          output=$(node test_audio_player.js)
+          echo "$output" # Print the output for logs
+          if echo "$output" | grep -q "FAIL"; then
+            echo "::error::Tests failed! Found 'FAIL' in the output."
+            exit 1
+          else
+            echo "All tests passed!"
+          fi
+
+      - name: Stop dev server
+        if: always() # Always run this step, even if tests fail
+        run: |
+          if [ -f server.pid ]; then
+            kill $(cat server.pid)
+            rm server.pid # Clean up the PID file
+          else
+            echo "server.pid not found, server might have failed to start or was already stopped."
+          fi
