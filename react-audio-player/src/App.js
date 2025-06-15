@@ -152,7 +152,7 @@ function App() {
     <>
       <header>
         <h1>the fresh prince</h1>
-        <p><a href="https://kenoir.github.io/the_fresh_prince/">https://kenoir.github.io/react-audio-player/</a></p>
+        <p><a href="https://kenoir.github.io/the_fresh_prince/">https://kenoir.github.io/the_fresh_prince/</a></p>
       </header>
 
       <audio ref={audioRef} id="track" src={`${process.env.PUBLIC_URL}/audio/belair.mp3`} muted>
