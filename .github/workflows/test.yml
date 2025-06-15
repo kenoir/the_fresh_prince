@@ -1,0 +1,27 @@
+name: Run Tests
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run tests and check for failures
+        run: |
+          output=$(node test_audio_player.js)
+          echo "$output" # Print the output for logs
+          if echo "$output" | grep -q "FAIL"; then
+            echo "::error::Tests failed! Found 'FAIL' in the output."
+            exit 1
+          else
+            echo "All tests passed!"
+          fi
