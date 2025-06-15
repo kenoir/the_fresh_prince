@@ -1,0 +1,35 @@
+name: Build and Push to gh-pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push: # Renamed job for clarity
+    name: Build and Push to gh-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Ensure this is the desired Node.js version
+
+      - name: Install dependencies and build
+        run: |
+          cd react-audio-player
+          npm install
+          npm run build
+
+      - name: Deploy to GitHub Pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./react-audio-player/build
+          # Optional: cname: yourdomain.com (if you have a custom domain)
+          # Optional: user_name: 'github-actions[bot]'
+          # Optional: user_email: 'github-actions[bot]@users.noreply.github.com'
+          # Optional: commit_message: 'Deploy to gh-pages from @ {sha}'

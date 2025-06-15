@@ -1,0 +1,43 @@
+name: Deploy to GitHub Pages from gh-pages
+
+on:
+  push:
+    branches:
+      - gh-pages # This workflow runs when commits are pushed to gh-pages
+
+jobs:
+  deploy-to-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # To deploy to Pages
+      id-token: write   # To authenticate with OIDC
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }} # URL will be available after deployment
+
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        # This will checkout the code from the gh-pages branch by default
+        # as this workflow is triggered by a push to gh-pages.
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+        # This action is optional if your site is static HTML/CSS/JS
+        # and doesn't require a specific build process on the gh-pages branch itself.
+        # However, it's good practice to include it.
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository (which is the gh-pages branch content)
+          path: './'
+
+      - name: Deploy to GitHub Pages
+        id: deployment # Give the step an ID to refer to its outputs
+        uses: actions/deploy-pages@v4
+        # This action will now deploy the artifact uploaded in the previous step.
+        # It should work because this workflow is triggered by a push to the gh-pages branch,
+        # satisfying the environment's branch restrictions.
