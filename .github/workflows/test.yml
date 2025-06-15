@@ -18,6 +18,10 @@ jobs:
       - name: Install Puppeteer
         run: npm install puppeteer # Installs puppeteer in the root directory
 
+      - name: Install app dependencies
+        run: npm install
+        working-directory: ./react-audio-player
+
       - name: Start dev server
         run: |
           cd react-audio-player
