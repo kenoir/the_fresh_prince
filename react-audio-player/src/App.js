@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 // Bigger ASCII Will Smith faces
 const willSmithMouthOpen = `
@@ -29,7 +29,6 @@ function App() {
   const [currentLine, setCurrentLine] = useState(null);
   const [nextLine, setNextLine] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playButtonText, setPlayButtonText] = useState('Start');
   const audioRef = useRef(null);
   const intervalRef = useRef(null); // To store interval ID for clearing
 
@@ -51,7 +50,6 @@ function App() {
       audioRef.current.muted = true;
     }
     setIsPlaying(false);
-    setPlayButtonText('Start');
     setCurrentLine(null);
     if (lyricsData && lyricsData.length > 0) {
       setNextLine(lyricsData[0]);
@@ -88,17 +86,11 @@ function App() {
       }
       audioRef.current.play().then(() => {
         setIsPlaying(true);
-        setPlayButtonText('Pause');
       }).catch(error => console.error("Error playing audio:", error));
     } else {
       audioRef.current.pause();
       setIsPlaying(false);
-      setPlayButtonText('Start');
     }
-  };
-
-  const handleStop = () => {
-    resetPlayer();
   };
 
   // Audio Event: onEnded
