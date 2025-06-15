@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 async function runTest() {
   let browser;
@@ -17,10 +18,16 @@ async function runTest() {
       console.log("PASS");
     } else {
       console.log("FAIL");
+      await page.screenshot({ path: 'failure_screenshot.png' });
+      const html = await page.content();
+      fs.writeFileSync('failure_dom.html', html);
     }
   } catch (error) {
     console.log("FAIL");
     console.error(error);
+    // It's possible page isn't defined here if launch or newPage failed.
+    // If it is, and we want a screenshot on error too, we'd need more robust error handling.
+    // For now, only handling the explicit "FAIL" case above.
   } finally {
     if (browser) {
       await browser.close();
