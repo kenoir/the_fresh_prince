@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/the_fresh_prince/static/css/main.eaa140a8.css",
-    "main.js": "/the_fresh_prince/static/js/main.21964ac2.js",
+    "main.js": "/the_fresh_prince/static/js/main.1fea35d8.js",
     "index.html": "/the_fresh_prince/index.html",
     "main.eaa140a8.css.map": "/the_fresh_prince/static/css/main.eaa140a8.css.map",
-    "main.21964ac2.js.map": "/the_fresh_prince/static/js/main.21964ac2.js.map"
+    "main.1fea35d8.js.map": "/the_fresh_prince/static/js/main.1fea35d8.js.map"
   },
   "entrypoints": [
     "static/css/main.eaa140a8.css",
-    "static/js/main.21964ac2.js"
+    "static/js/main.1fea35d8.js"
   ]
 }
