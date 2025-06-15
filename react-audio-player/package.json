@@ -2,7 +2,7 @@
   "name": "react-audio-player",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://kenoir.github.io/the_fresh_prince",
+  "homepage": "https://kenoir.github.io/react-audio-player",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
