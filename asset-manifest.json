@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/the_fresh_prince/static/css/main.eaa140a8.css",
-    "main.js": "/the_fresh_prince/static/js/main.c33aa456.js",
-    "index.html": "/the_fresh_prince/index.html",
-    "main.eaa140a8.css.map": "/the_fresh_prince/static/css/main.eaa140a8.css.map",
-    "main.c33aa456.js.map": "/the_fresh_prince/static/js/main.c33aa456.js.map"
+    "main.css": "/react-audio-player/static/css/main.eaa140a8.css",
+    "main.js": "/react-audio-player/static/js/main.28239065.js",
+    "index.html": "/react-audio-player/index.html",
+    "main.eaa140a8.css.map": "/react-audio-player/static/css/main.eaa140a8.css.map",
+    "main.28239065.js.map": "/react-audio-player/static/js/main.28239065.js.map"
   },
   "entrypoints": [
     "static/css/main.eaa140a8.css",
-    "static/js/main.c33aa456.js"
+    "static/js/main.28239065.js"
   ]
 }
