@@ -149,7 +149,7 @@ function App() {
 
 
   return (
-    <>cd
+    <>
       <header>
         <h1>the fresh prince</h1>
         <p><a href="https://kenoir.github.io/the_fresh_prince/">https://kenoir.github.io/react-audio-player/</a></p>
