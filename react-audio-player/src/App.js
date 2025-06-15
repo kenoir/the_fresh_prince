@@ -11,7 +11,7 @@ function App() {
 
   // Fetch Lyric Data
   useEffect(() => {
-    fetch('/belair.json')
+    fetch(`${process.env.PUBLIC_URL}/belair.json`)
       .then(response => response.json())
       .then(data => {
         setLyricsData(data.lines);
@@ -152,10 +152,10 @@ function App() {
     <>
       <header>
         <h1>the fresh prince</h1>
-        <p><a href="https://kenoir.github.io/the_fresh_prince/">https://kenoir.github.io/the_fresh_prince/</a></p>
+        <p><a href="https://kenoir.github.io/react-audio-player/">https://kenoir.github.io/react-audio-player/</a></p>
       </header>
 
-      <audio ref={audioRef} id="track" src="/audio/belair.mp3" muted>
+      <audio ref={audioRef} id="track" src={`${process.env.PUBLIC_URL}/audio/belair.mp3`} muted>
         <p>Your browser sucks and you should feel bad.</p>
       </audio>
 
