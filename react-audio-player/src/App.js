@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 function App() {
   const [lyricsData, setLyricsData] = useState([]);
@@ -20,7 +20,7 @@ function App() {
       .catch(error => console.error('Error fetching lyrics:', error));
   }, []);
 
-  const resetPlayer = () => {
+  const resetPlayer = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -38,14 +38,15 @@ function App() {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-  };
+  }, [lyricsData, audioRef]);
 
   // Call resetPlayer when lyricsData is loaded to ensure nextLine is set
+  // and when resetPlayer itself changes (though with useCallback, it only changes if its own dependencies change)
   useEffect(() => {
     if (lyricsData.length > 0) {
       resetPlayer(); // Initialize player state once lyrics are loaded
     }
-  }, [lyricsData]);
+  }, [lyricsData, resetPlayer]);
 
 
   const togglePlayPause = () => {
@@ -101,7 +102,7 @@ function App() {
       const playTime = audioElement.currentTime;
       // console.log(playTime.toFixed(1)); // For debugging
 
-      if (nextLine && nextLine.time < playTime) {
+      if (nextLine && nextLine.time <= playTime) {
         setCurrentLine(nextLine);
         // Find the index of the current nextLine and set the one after it
         const currentNextLineIndex = lyricsData.findIndex(line => line.time === nextLine.time && line.text === nextLine.text);

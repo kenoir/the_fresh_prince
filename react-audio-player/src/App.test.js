@@ -75,35 +75,71 @@ describe('App component', () => {
     });
     mockRemoveEventListener = jest.spyOn(window.HTMLMediaElement.prototype, 'removeEventListener').mockImplementation(jest.fn());
 
-    render(<App />);
-    await screen.findByRole('button', { name: /start/i });
+    // mockAddEventListener is already defined in the outer scope
+    mockAddEventListener = jest.spyOn(window.HTMLMediaElement.prototype, 'addEventListener').mockImplementation((event, handler) => {
+      if (!mockAudioPlayerState.eventListeners[event]) {
+          mockAudioPlayerState.eventListeners[event] = [];
+      }
+      mockAudioPlayerState.eventListeners[event].push(handler);
+    });
+    mockRemoveEventListener = jest.spyOn(window.HTMLMediaElement.prototype, 'removeEventListener').mockImplementation((event, handler) => {
+      if (mockAudioPlayerState.eventListeners[event]) {
+        const index = mockAudioPlayerState.eventListeners[event].indexOf(handler);
+        if (index > -1) {
+          mockAudioPlayerState.eventListeners[event].splice(index, 1);
+        }
+      }
+    });
 
+    render(<App />);
+
+    // Wait for fetch to be called (initiates data loading)
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
+
+    // Wait for the 'ended' event listener to be set up,
+    // which implies lyricsData is loaded and resetPlayer is stable.
+    await waitFor(() => {
+      expect(mockAddEventListener).toHaveBeenCalledWith('ended', expect.any(Function));
+    });
+
+    // Clear mocks for the actual test part
     fetchSpy.mockClear();
     mockPlay.mockClear();
     mockPause.mockClear();
+    mockAddEventListener.mockClear();
+    mockRemoveEventListener.mockClear();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
     jest.clearAllTimers();
-    jest.useRealTimers();
+    jest.useRealTimers(); // Ensure real timers are restored after each test
 
+    // Ensure specific mocks on HTMLMediaElement.prototype are cleaned up if they were set with Object.defineProperty
+    // However, jest.restoreAllMocks() should handle spies created with jest.spyOn.
+    // If properties were directly assigned/deleted, manual cleanup is safer.
+    // For properties defined with Object.defineProperty in beforeEach, they should be deleted.
     delete window.HTMLMediaElement.prototype.paused;
     delete window.HTMLMediaElement.prototype.muted;
     delete window.HTMLMediaElement.prototype.currentTime;
     delete window.HTMLMediaElement.prototype.duration;
+    // mockAddEventListener and mockRemoveEventListener are restored by jest.restoreAllMocks()
   });
 
-  test('initial state is set up correctly by beforeEach', () => {
+  test('initial state is set up correctly after async setup', () => {
+    // This test now runs AFTER the new waitFor conditions in beforeEach
     expect(screen.getByRole('button', { name: /start/i })).toBeInTheDocument();
-    expect(mockAudioPlayerState.muted).toBe(true);
+    expect(mockAudioPlayerState.muted).toBe(true); // Assuming resetPlayer was called
     expect(mockAudioPlayerState.paused).toBe(true);
     expect(screen.getByText('stop')).toBeInTheDocument();
     const loudspeaker = screen.getByTestId('loudspeaker');
-    expect(loudspeaker).toHaveTextContent('');
+    expect(loudspeaker).toHaveTextContent(''); // currentLine is null after resetPlayer
+
+    // These mocks are cleared in beforeEach, so they should not have been called yet for THIS test's actions
     expect(mockPlay).not.toHaveBeenCalled();
     expect(mockPause).not.toHaveBeenCalled();
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled(); // fetchSpy is cleared, so this is correct.
+    expect(mockAddEventListener).not.toHaveBeenCalled(); // also cleared
   });
 
   test('should toggle play/pause button text and call play/pause', async () => {
@@ -153,24 +189,21 @@ describe('App component', () => {
   });
 
   test('should display the first lyric after playing for a short time', async () => {
-    jest.useRealTimers();
-    // App is rendered in beforeEach
+    jest.useFakeTimers(); // Use fake timers before any interactions that might set intervals
 
     const playButton = await screen.findByRole('button', { name: /start/i });
     const loudspeaker = screen.getByTestId('loudspeaker');
 
     await act(async () => { fireEvent.click(playButton); });
+    // Clicking play sets isPlaying to true, which triggers the useEffect for lyric sync to set an interval.
+    // This interval is now a Jest fake timer.
+
     await waitFor(() => screen.getByRole('button', { name: /pause/i }));
-    // If "Pause" button is visible, component should be in "playing" state.
-    // Commenting out the problematic assertion for now
-    // expect(mockAudioPlayerState.paused).toBe(false);
-
-
-    jest.useFakeTimers();
+    // expect(mockAudioPlayerState.paused).toBe(false); // This can be racy depending on mock execution
 
     await act(async () => {
       mockAudioPlayerState.currentTime = 0.1;
-      jest.advanceTimersByTime(250);
+      jest.advanceTimersByTime(250); // Advance the fake timer by 250ms
     });
     await waitFor(() => expect(loudspeaker.textContent).toBe(mockLyricsData.lines[0].text), { timeout: 1000 });
 
@@ -180,29 +213,28 @@ describe('App component', () => {
     });
     await waitFor(() => expect(loudspeaker.textContent).toBe(mockLyricsData.lines[1].text), { timeout: 1000 });
 
-    jest.useRealTimers();
+    // No need to call jest.useRealTimers(); here, afterEach will handle it.
   });
 
   test('audio ended event should reset play button', async () => {
-    jest.useRealTimers();
-    // App is rendered in beforeEach
+    jest.useFakeTimers(); // Use fake timers before any interactions that might set intervals
 
     const playButton = await screen.findByRole('button', { name: /start/i });
     const loudspeaker = screen.getByTestId('loudspeaker');
 
     await act(async () => { fireEvent.click(playButton); });
+    // Interval for lyric sync is now a Jest fake timer.
+
     await waitFor(() => screen.getByRole('button', { name: /pause/i }));
-    // Commenting out the problematic assertion for now
     // expect(mockAudioPlayerState.paused).toBe(false);
     mockPause.mockClear();
 
-    jest.useFakeTimers();
     await act(async () => {
         mockAudioPlayerState.currentTime = 0.1;
-        jest.advanceTimersByTime(250);
+        jest.advanceTimersByTime(250); // Advance the fake timer
     });
     await waitFor(() => expect(loudspeaker.textContent).toBe(mockLyricsData.lines[0].text));
-    jest.useRealTimers();
+    // No need to call jest.useRealTimers(); here.
 
     await act(async () => {
         mockAudioPlayerState.currentTime = mockAudioPlayerState.duration;
