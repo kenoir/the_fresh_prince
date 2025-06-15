@@ -1,5 +1,29 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+// Bigger ASCII Will Smith faces
+const willSmithMouthOpen = `
+      _________
+     /         \\
+    /  o   o   \\
+   |     ^      |
+   |    ___     |
+   |   /   \\    |
+   |   \\___/    |
+    \\         /
+     \\_______/
+`;
+const willSmithMouthClosed = `
+      _________
+     /         \\
+    /  o   o   \\
+   |     ^      |
+   |    ___     |
+   |   |---|    |
+   |           |
+    \\         /
+     \\_______/
+`;
+
 function App() {
   const [lyricsData, setLyricsData] = useState([]);
   const [currentLine, setCurrentLine] = useState(null);
@@ -147,13 +171,134 @@ function App() {
     };
   }, [isPlaying, lyricsData, nextLine, currentLine]); // Dependencies for the lyric sync effect
 
+  // Animation state for Will Smith's mouth
+  const [mouthOpen, setMouthOpen] = useState(false);
+  const mouthAnimRef = useRef(null);
+
+  // Animate mouth when lyrics are being displayed
+  useEffect(() => {
+    if (currentLine && currentLine.text) {
+      // Start mouth animation (open/close every 250ms)
+      if (!mouthAnimRef.current) {
+        mouthAnimRef.current = setInterval(() => {
+          setMouthOpen(prev => !prev);
+        }, 250);
+      }
+    } else {
+      // No lyrics: close mouth and stop animation
+      setMouthOpen(false);
+      if (mouthAnimRef.current) {
+        clearInterval(mouthAnimRef.current);
+        mouthAnimRef.current = null;
+      }
+    }
+    // Cleanup on unmount
+    return () => {
+      if (mouthAnimRef.current) {
+        clearInterval(mouthAnimRef.current);
+        mouthAnimRef.current = null;
+      }
+    };
+  }, [currentLine]);
 
   return (
     <>
-      <header>
-        <h1>the fresh prince</h1>
-        <p><a href="https://kenoir.github.io/the_fresh_prince/">https://kenoir.github.io/the_fresh_prince/</a></p>
+      <style>{`
+        body, #root {
+          background: #181c24;
+          color: #e0e6f0;
+          font-family: 'Fira Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
+          margin: 0;
+          min-height: 100vh;
+        }
+        header {
+          background: #232837;
+          color: #f9f9fa;
+          padding: 1.5em 2em 1em 2em;
+          border-bottom: 2px solid #2c3142;
+          font-family: 'Montserrat', 'Arial', sans-serif;
+        }
+        header h1 {
+          margin: 0 0 0.2em 0;
+          font-size: 2.2em;
+          letter-spacing: 0.04em;
+          font-weight: 700;
+        }
+        header a {
+          color: #7ecfff;
+          text-decoration: none;
+          font-size: 1em;
+        }
+        header a:hover {
+          text-decoration: underline;
+        }
+        #play {
+          background: linear-gradient(90deg, #3a3f5a 60%, #2e3347 100%);
+          color: #fff;
+          border: none;
+          border-radius: 2em;
+          font-size: 1.1em;
+          font-family: 'Montserrat', 'Arial', sans-serif;
+          font-weight: 600;
+          padding: 0.7em 2.2em;
+          margin-left: 2em;
+          box-shadow: 0 2px 8px #0002;
+          cursor: pointer;
+          transition: background 0.2s, color 0.2s;
+        }
+        #play:hover {
+          background: linear-gradient(90deg, #4a90e2 60%, #357ab8 100%);
+          color: #fff;
+        }
+        #ascii-will-smith {
+          background: #232837;
+          color: #7ecfff;
+          border-radius: 1em;
+          box-shadow: 0 2px 16px #0003;
+          padding: 1.2em 0.5em 1.2em 0.5em;
+          margin: 2em auto 1.5em auto;
+          max-width: 420px;
+          font-family: 'Fira Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
+          font-size: 1.7em;
+          text-align: center;
+          line-height: 1.1;
+        }
+        #loudspeaker {
+          background: #232837;
+          color: #f9f9fa;
+          border-radius: 0.7em;
+          box-shadow: 0 2px 12px #0002;
+          font-family: 'Montserrat', 'Arial', sans-serif;
+          font-size: 1.3em;
+          font-weight: 500;
+          text-align: center;
+          margin: 1.5em auto 0 auto;
+          padding: 1.1em 1.5em;
+          max-width: 600px;
+          letter-spacing: 0.01em;
+        }
+      `}</style>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1>the fresh prince</h1>
+          <p><a href="https://kenoir.github.io/the_fresh_prince/">https://kenoir.github.io/the_fresh_prince/</a></p>
+        </div>
+        <button
+          id="play"
+          type="button"
+          onClick={togglePlayPause}
+          style={{ alignSelf: 'flex-start', marginLeft: 'auto', minWidth: 80 }}
+        >
+          {isPlaying ? 'Pause' : 'Play'}
+        </button>
       </header>
+
+      <pre
+        id="ascii-will-smith"
+        aria-label="Animated ASCII Will Smith"
+      >
+        {mouthOpen ? willSmithMouthOpen : willSmithMouthClosed}
+      </pre>
 
       <audio ref={audioRef} id="track" src={`${process.env.PUBLIC_URL}/audio/belair.mp3`} muted>
         <p>Your browser sucks and you should feel bad.</p>
@@ -161,11 +306,6 @@ function App() {
 
       <div id="loudspeaker" data-testid="loudspeaker">
         {currentLine ? currentLine.text : ''}
-      </div>
-
-      <div id="controls">
-        <button id="stop" type="button" onClick={handleStop}>stop</button>
-        <button id="play" type="button" onClick={togglePlayPause}>{playButtonText}</button>
       </div>
     </>
   );
